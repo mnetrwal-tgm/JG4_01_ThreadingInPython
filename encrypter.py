@@ -3,7 +3,12 @@ import math
 import random
 class encrypter(threading.Thread):
     def __init__(self,msg,enDe,key):
+        """
 
+        :param msg: The message
+        :param enDe: Encrypt or Decrypt
+        :param key: The Encryption key
+        """
         #Initializing
         threading.Thread.__init__(self)
         self.msg=msg
@@ -13,9 +18,15 @@ class encrypter(threading.Thread):
 
 
     def run(self):
+        """
 
+        :return: the Message
+        """
+        #The index
         i = 0
+        #the final message
         msgnew = ""
+        #The two tables for the en/decryption
         table = {' ': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'a': 10, 'b': 11,
                  'c': 12, 'd': 13, 'e': 14, 'f': 15, 'g': 16, 'h': 17, 'i': 18, 'j': 19, 'k': 20, 'l': 21, 'm': 22,
                  'n': 23, 'o': 24, 'p': 25, 'q': 26, 'r': 27, 's': 28, 't': 29, 'u': 30, 'v': 31, 'w': 32, 'x': 33,
@@ -30,27 +41,42 @@ class encrypter(threading.Thread):
                   45: 'F', 46: 'G', 47: 'H', 48: 'I', 49: 'J', 50: 'K', 51: 'L', 52: 'M', 53: 'N', 54: 'O', 55: 'P',
                   56: 'Q', 57: 'R', 58: 'S', 59: 'T', 60: 'U', 61: 'V', 62: 'W', 63: 'X', 64: 'Y', 65: 'Z', 66: 'Ä',
                   68: 'Ö', 69: 'Ü', 70: '/', 71: ',', 72: '|'}
-        #Testvalues: abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ/,|
-        if self.enDe:
-            while i <= len(self.msg):
 
+
+        if self.enDe:
+
+            # Testvalue: abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ/,|
+
+            while i < len(self.msg):
                 try:
-                    msgnew+=table2[(self.key+table[self.msg[i]])%72]
+                    #The character on index i gets read -> turned into int and combined with the offset -> turned into character -> added to the
+                    # final string
+                    msgnew+=table2[(self.key+table[self.msg[i]])%73]
 
                 except:
+                    #If the character isn't encryptable
                     print("Zeichen '"+msg[i]+"' nicht verschlüsselbar -> wird übersprungen")
+                    msgnew += msg[i]
+
                 i+=1
         else:
-            while i <= len(self.msg):
+            while i < len(self.msg):
                 try:
-                    msgnew += table2[(-self.key + table[self.msg[i]]) % 72]
+                    #See above, it works the same way
+                    msgnew += table2[(-self.key + table[self.msg[i]]) % 73]
                 except:
                     print("Zeichen '"+msg[i]+"' nicht entschlüsselbar -> wird übersprungen")
+                    msgnew += msg[i]
                 i += 1
 
         return msgnew
 
 def toIntChecker(out):
+    """
+
+    :param out: what the user shall see
+    :return: the User Input as an Integer
+    """
     running2 = True
     while running2:
         try:
@@ -62,13 +88,23 @@ def toIntChecker(out):
 
     return re
 
+
+
+
+
+
+
+
+
+
 running=True
 while running:
     running2=True
     usrin=toIntChecker("Wollen sie encoden [2], decoden [1] oder das programm beenden [0]?")
 
 
-    if usrin <= 2 and usrin >= 1:
+    if usrin <= 2 and usrin >= 1:#unfancy check if the User wants to en/decrypt
+
         msg=input("Was ist ihre Nachricht?")
         while msg=="":
             msg = input("Was ist ihre Nachricht?")
@@ -86,16 +122,20 @@ while running:
         #Aus einem Tutorial kopiert und angepasst. befüllt die Liste mit den Threads.
         encoders = []
         i=0
-        while i < noT-1:
-            temp1=i*(len(msg)/noT)+1
-            temp2=(i+1)*(len(msg)/noT)+1
+        t1=(len(msg)/noT)
+        if t1%1!=0:
+            t1=int(t1)+1
+
+        while i < noT:
+            temp1=i*t1
+            temp2=(i+1)*t1
             temp1=int(temp1)
             temp2=int(temp2)
             encoders.append(encrypter(msg[temp1:temp2],usrin-1,key))
             i+=1
 
-        temp1 = i * (len(msg) / noT) + 1
-        temp2 = (i + 1) * (len(msg) / noT) + 1
+        temp1 = i * t1
+        temp2 = (i) * t1 + len(msg)%noT
         temp1 = int(temp1)
         temp2 = int(temp2)
 
@@ -103,7 +143,7 @@ while running:
 
         finalmsg=""
         i=0
-        while i < noT - 1:
+        while i < noT :
             encoders[i].start()
             finalmsg+=encoders[i].run()
             i+=1
